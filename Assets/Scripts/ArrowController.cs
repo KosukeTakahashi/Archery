@@ -1,7 +1,7 @@
 ﻿#define DEBUG
-//#undef DEBUG
+#undef DEBUG
 #define RELEASE
-#undef RELEASE
+//#undef RELEASE
 
 using System;
 using UnityEngine;
@@ -42,13 +42,31 @@ public class ArrowController : MonoBehaviour
 
         if (!flagLaunched)
         {
-            var mPos = Input.mousePosition.y;
-            transform.rotation = Quaternion.Euler(-(mPos % 90), 0f, 0f);
+            var mPosX = Input.mousePosition.x;
+            var mPosY = Input.mousePosition.y;
+            transform.rotation = GetRotation(mPosX, 30, 'x', -15);
+            transform.rotation = GetRotation(mPosY, 90, 'y');
         }
 
         //左クリック
         if (!flagLaunched && Input.GetMouseButton(0))
             Launch();
+    }
+
+    private Quaternion GetRotation(float pos, float range, char axis, float shift = 0)
+    {
+        var angle = (pos % range) + shift;
+        switch (axis)
+        {
+            case 'x':
+                return Quaternion.Euler(angle, 0f, 0f);
+            case 'y':
+                return Quaternion.Euler(0f, angle, 0f);
+            case 'z':
+                return Quaternion.Euler(0f, 0f, angle);
+            default:
+                return Quaternion.identity;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -57,7 +75,9 @@ public class ArrowController : MonoBehaviour
         {
             StopArrow(true);
 
-            var distance = Math.Abs(transform.position.y);
+            var distance = Math.Sqrt(
+                Math.Pow(transform.position.x, 2) +
+                Math.Pow(transform.position.y, 2));
 
             if (distance <= 0.26)
                 integratedController.CallbackArrow(4);
@@ -134,7 +154,7 @@ public class ArrowController : MonoBehaviour
     {
         if (other.name.Equals("Target"))
         {
-            Invoke("StopArrow", delay);
+            StopArrow(true);
 
             var distance = Math.Abs(transform.position.y);
 
@@ -163,10 +183,18 @@ public class ArrowController : MonoBehaviour
         flagLaunched = true;
     }
 
-    private void StopArrow()
+    private void StopArrow(bool adjust = false)
     {
         rigidbody.velocity = Vector3.zero;
         rigidbody.useGravity = false;
+
+        if (adjust)
+        {
+            transform.position = new Vector3(
+            transform.position.x,
+            transform.position.y,
+            31f);
+        }
     }
 
     public void ReInit()
