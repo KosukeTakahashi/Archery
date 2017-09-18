@@ -162,7 +162,7 @@ public class ArrowController : MonoBehaviour
                 integratedController.CallbackArrow(4);
             else if (distance <= 1)
                 integratedController.CallbackArrow(3);
-            else if (distance <= 2)
+            else if (distance <= 1.5)
                 integratedController.CallbackArrow(2);
             else
                 integratedController.CallbackArrow(1);
